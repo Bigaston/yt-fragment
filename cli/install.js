@@ -1,3 +1,6 @@
+const fs = require("fs")
+const path = require("path")
+
 if (!fs.existsSync(path.join(__dirname, "../.env"))) {
     fs.writeFileSync(path.join(__dirname, "../.env"), `
 PORT=2448
