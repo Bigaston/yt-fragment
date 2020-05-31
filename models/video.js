@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
 	},
 	url: DataTypes.STRING,
+	title: DataTypes.STRING,
     end_timestamp: {
       type: DataTypes.DATE
     },

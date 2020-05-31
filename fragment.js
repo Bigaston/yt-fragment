@@ -20,7 +20,8 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 app.use("/static", express.static('./web/static'));
 
 app.get("/" + process.env.ADDR_PREFIX, m.main_crtl.index)
-
 app.post("/" + process.env.ADDR_PREFIX + "/add", m.main_crtl.add)
+app.get("/" + process.env.ADDR_PREFIX + "/dl", m.main_crtl.dl_page)
+app.get("/" + process.env.ADDR_PREFIX + "/dl/:id", m.main_crtl.dl_video)
 
 app.listen(process.env.PORT, () => console.log(`Serveur lancé sur le port ${process.env.PORT}`))

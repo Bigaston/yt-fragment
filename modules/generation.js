@@ -15,13 +15,27 @@ module.exports = {
 	},
 	start_generation: (video) => {
         console.log(video.id + " Démarage de la création");
-		var ws = fs.createWriteStream("./tmp/" + video.id + ".flv")
+		var ws = fs.createWriteStream("./tmp/video_" + video.id + ".mp4")
+		var ws_audio = fs.createWriteStream("./tmp/audio_" + video.id + ".mp4")
 
-		ytdl(video.url, {begin: video.start_time + ".000"}).pipe(ws)
+		ytdl.getBasicInfo(video.url, undefined, (err, info) => {
+			video.title = info.title
+			video.save().then((vid) => {
+				video = vid;
+				
+				ytdl(video.url, {quality: "highestvideo"}).pipe(ws)
 
-		ws.on('finish', function() {
-			module.exports.cut_video(video);
-		});
+				ws.on('finish', function() {
+					console.log(video.id + " Vidéo téléchargée")
+					ytdl(video.url, {quality: "highestaudio"}).pipe(ws_audio)
+					ws_audio.on("finish", function() {
+						console.log(video.id + " Audio téléchargé")
+		
+						module.exports.cut_video(video);
+					})
+				});
+			})
+		})
 	},
 	cut_video: (video) => {
 		console.log(video.id + " Découpage de la vidéo");
@@ -34,7 +48,7 @@ module.exports = {
 
 		var duration = parseInt(s_end) - parseInt(s_start)
 	
-		var child = spawn("ffmpeg", ["-i", `./tmp/${video.id}.flv`, "-t", duration, `./video/${video.id}.mp4`]);
+		var child = spawn("ffmpeg", ["-ss", s_start, "-i", `./tmp/audio_${video.id}.mp4`, "-ss", s_start, "-i", `./tmp/video_${video.id}.mp4`, "-t", duration, `./video/${video.id}.mp4`]);
     
         child.stdout.on('data', function (data) {
         	console.log(video.id + ' stdout: ' + data);
@@ -50,7 +64,8 @@ module.exports = {
 			video.end_timestamp = Date.now()
 			video.save()
 			.then(() => {
-				fs.unlinkSync(path.join(__dirname, "../tmp/", `${video.id}.flv`))
+				fs.unlinkSync(path.join(__dirname, "../tmp/", `video_${video.id}.mp4`))
+				fs.unlinkSync(path.join(__dirname, "../tmp/", `audio_${video.id}.mp4`))
 			
 				module.exports.init_new_generation()
 			});

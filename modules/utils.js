@@ -24,4 +24,12 @@ module.exports = {
 			}
 		})
 	},
+	change_title: (title) => {
+		new_title = title;
+		new_title = new_title.toLowerCase();
+		new_title = new_title.replace(/ /g, "_").replace(/\./g, "").replace(/#/g, "_").replace(/\\/g, "");
+		new_title = new_title.substring(0, 50);
+		
+		return new_title;
+	}
 }
